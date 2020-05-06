@@ -1,0 +1,114 @@
+#!/usr/bin/python
+
+import socket
+import serial
+import sys
+import time
+import re
+import os
+from threading import Thread, Event
+
+MSG_LENGTH = 14
+LOG_FILE = "/home/pi/logs/command_server.log"
+
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+
+def isMessageValid(message):
+  if (len(message) == MSG_LENGTH):
+    if ((message[0] == '<') and (message[13] == '>')):
+      if ((message[1] == '@') or (message[1] == '*') or (message[1] == '#') or (message[1] == '&')):
+        if (message[1] == message[12]):
+          return True
+  return False
+
+def clearSerial():
+  message = ser.read(1);
+  totalCleared = 0
+  while (len(message) == 1):
+    totalCleared = totalCleared + 1
+    message = ser.read(1)
+  return totalCleared
+
+def serialWatch(e):
+  while 1:
+    if not e.is_set():
+      message = ser.read(MSG_LENGTH)
+      if (not isMessageValid(message)):
+        clearSerial()
+        continue
+      else:
+        log_file = open(LOG_FILE, 'a')
+        m = re.search('<&(.*)&>', s)
+        if (m != None):
+          (child_stdin, child_stdout, child_stderr) = os.popen3('/home/pi/bin/button_pressed.php '+m.group(1))
+          log_file.write(s)
+          log_file.write("SerialRead: "+m.group(1)+"\n")
+          try:
+            log_file.write("button_pressed.php [stdin]: "+child_stdin.read()+"\n")
+          except:
+            log_file.write("button_pressed.php [stdin]: \n")
+          try:
+            log_file.write("button_pressed.php [stdout]: "+child_stdout.read()+"\n")
+          except:
+            log_file.write("button_pressed.php [stdout]: \n")
+          try:
+            log_file.write("button_pressed.php [stderr]: "+child_stderr.read()+"\n")
+          except:
+            log_file.write("button_pressed.php [stderr]: \n")
+        else:
+          log_file.write("Got junk: "+message+"\n");
+        log_file.close();
+    else:
+      e.wait()
+
+def socketWatch(clientsocket, clientaddress, e):
+  e.set()
+  time.sleep(1)
+  msg = clientsocket.recv(MSG_LENGTH)
+  if msg == '': return
+  log_file = open(LOG_FILE, 'a')
+  log_file.write("SerialCommand: "+msg+"\n")
+  ser.write(msg)
+  s = ser.read(MSG_LENGTH)
+  log_file.write("SerialReturn: "+s)
+  m = re.search('@@(.*)@@', s)
+  ret = ""
+  if (m != None):
+    ret = m.group(1)
+  while (len(s) == MSG_LENGTH):
+    s = ser.read(MSG_LENGTH)
+    log_file.write(s)
+    m = re.search('@@(.*)@@', s)
+    if (m != None):
+      ret = m.group(1)
+  if (ret == ""):
+    log_file.write("failed\n")
+    clientsocket.send("-1\n");
+  else:
+    clientsocket.send(ret+"\n");
+    log_file.write(ret+"\n")
+  log_file.close();
+  clientsocket.close()
+  e.clear()
+
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+PORT = 10000
+HOST = '0.0.0.0'
+
+serversocket.bind((HOST, PORT))
+serversocket.listen(10)
+
+e = Event()
+
+serialThread = Thread(target=serialWatch, args=(e,))
+serialThread.start()
+
+while 1:
+  try:
+    (clientsocket, address) = serversocket.accept()
+  except:
+    serialThread.join()
+    break
+  socketThread = Thread(target=socketWatch, args=(clientsocket, address, e,))
+  socketThread.start()
