@@ -1,0 +1,119 @@
+#!/usr/bin/python
+
+import socket
+import serial
+import sys
+import time
+import re
+import os
+from threading import Thread, Lock
+
+MSG_LENGTH = 14
+LOG_FILE = "/home/pi/logs/command_server.log"
+
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=2)
+
+def isControlValid(control):
+  if len(control) == MSG_LENGTH:
+    if control[0] == '<' and control[13] == '>':
+      if control[1] == '@' or control[1] == '*' or control[1] == '#' or control[1] == '&':
+        if control[1] == control[12]:
+          return True
+  return False
+
+def clearSerial():
+  control = ser.read(1)
+  totalCleared = 0
+  while (len(control) == 1):
+    totalCleared = totalCleared + 1
+    control = ser.read(1)
+  return totalCleared
+
+def serialWatch(lock):
+  while 1:
+    lock.acquire()
+    control = ser.read(MSG_LENGTH)
+    if (not isControlValid(control)):
+      clearSerial()
+    else:
+      log_file = open(LOG_FILE, 'a')
+      log_file.write("SerialIn: "+control+"\n")
+      m = re.search('<&(.*)&>', control)
+      if (m != None):
+        controlString = m.group(1)
+        controlId = controlString[0:3]
+        controlType = controlString[4:5]
+        buttonAction = controlString[8:9]
+        button = controlString[10:11]
+        log_file.write("controlString: "+controlString+"\n")
+        log_file.write("controlId: "+controlId+"\n")
+        log_file.write("controlType: "+controlType+"\n")
+        log_file.write("buttonAction: "+buttonAction+"\n")
+        log_file.write("button: "+button+"\n")
+        if (controlType == "11"):
+          (child_stdin, child_stdout, child_stderr) = os.popen3('/home/pi/bin/button_pressed.php '+buttonAction+' '+button)
+          log_file.write("SerialRead: "+controlString+"\n")
+          try:
+            log_file.write("button_pressed.php [stdout]: "+child_stdout.read()+"\n")
+          except:
+            log_file.write("button_pressed.php [stdout]: \n")
+          try:
+            log_file.write("button_pressed.php [stderr]: "+child_stderr.read()+"\n")
+          except:
+            log_file.write("button_pressed.php [stderr]: \n")
+        else:
+          log_file.write("Not a button... odd "+control+"\n")
+      else:
+        log_file.write("Got junk: "+control+"\n")
+      log_file.close()
+    lock.release()
+    time.sleep(1)
+
+def socketWatch(clientsocket, clientaddress, lock):
+  lock.acquire()
+  msg = clientsocket.recv(MSG_LENGTH)
+  if msg == '': return
+  log_file = open(LOG_FILE, 'a')
+  log_file.write("SocketIn: "+msg+"\n")
+  log_file.write("SerialCommand: "+msg+"\n")
+  ser.write(msg)
+  response = ser.read(MSG_LENGTH)
+  log_file.write("SerialResponse: "+response+"\n")
+  if (not isControlValid(response)):
+    log_file.write("Failed to get valid a response for: "+msg+"\n")
+    clientsocket.send("-1\n")
+    clearSerial()
+  else:
+    m = re.search('<#(.*)#>', response)
+    if (m != None):
+      responseString = m.group(1)
+      log_file.write("SocketOut: "+responseString+"\n");
+      clientsocket.send(responseString+"\n")
+    else:
+      log_file.write("failed\n")
+      clientsocket.send("-1\n")
+  log_file.close()
+  clientsocket.close()
+  lock.release()
+
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+PORT = 10000
+HOST = '0.0.0.0'
+
+serversocket.bind((HOST, PORT))
+serversocket.listen(10)
+
+lock = Lock()
+
+serialThread = Thread(target=serialWatch, args=(lock,))
+serialThread.start()
+
+while 1:
+  try:
+    (clientsocket, address) = serversocket.accept()
+  except:
+    serialThread.join()
+    break
+  socketThread = Thread(target=socketWatch, args=(clientsocket, address, lock,))
+  socketThread.start()
