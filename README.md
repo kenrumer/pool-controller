@@ -56,10 +56,10 @@ You need this because we won't be using the desktop anymore.  You will need to a
 Need source code
 git clone <repo_name>
 
-Need to keep it running, install supervisor
+Need to keep command server and UI running, install supervisor
 sudo pip install supervisor
 
 --------------------------------
 Setup supervisor
-sudo echo_supervisord_conf > /etc/supervisord.conf
+sudo cp files/supervisord.conf > /etc/supervisord.conf
 
