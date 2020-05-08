@@ -6,7 +6,7 @@ arduino dir controls the arduino stuff
 www controls the UI stuff
 
 Download Rapbian with desktop and recommended software:
-raspberrypi.org/downloads/raspbian/
+https://downloads.raspberrypi.org/raspbian_full_latest
 
 Download Win32DiskImager:
 https://sourceforge.net/projects/win32diskimager/
