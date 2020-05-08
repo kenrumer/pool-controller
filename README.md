@@ -5,6 +5,13 @@ pi dir controls the rpi stuff
 arduino dir controls the arduino stuff
 www controls the UI stuff
 
+Download the Raspberry Pi installer:
+https://downloads.raspberrypi.org/imager/imager.exe
+Install, then choose:
+Raspbian, and your SD Card
+
+Or:
+
 Download Rapbian with desktop and recommended software:
 https://downloads.raspberrypi.org/raspbian_full_latest
 
