@@ -7,6 +7,7 @@ www controls the UI stuff
 
 -----------------------------
 
+Insert sdcard into writer or slot
 Download the Raspberry Pi installer:
 https://downloads.raspberrypi.org/imager/imager.exe
 Install, then choose:
@@ -22,9 +23,10 @@ Use 7zip to extract the image (img file)
 
 Download Win32DiskImager:
 https://sourceforge.net/projects/win32diskimager/
+Run win32diskimager
+Select the extracted file and choose Write
 
-Insert sdcard into writer or slot
-------------------------------
+--------------------------
 
 Insert sdcard into raspberry pi and start it up
 You'll need the UI:
