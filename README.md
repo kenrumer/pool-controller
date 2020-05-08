@@ -5,6 +5,8 @@ pi dir controls the rpi stuff
 arduino dir controls the arduino stuff
 www controls the UI stuff
 
+-----------------------------
+
 Download the Raspberry Pi installer:
 https://downloads.raspberrypi.org/imager/imager.exe
 Install, then choose:
@@ -18,10 +20,16 @@ https://downloads.raspberrypi.org/raspbian_full_latest
 Download Win32DiskImager:
 https://sourceforge.net/projects/win32diskimager/
 
-Insert sdcard into raspberry pi and start it up
+------------------------------
 
-Reset the password for 'pi' account:
-sudo passwd pi
+Insert sdcard into raspberry pi and start it up
+You'll need the UI, set a new password in the desktop
+
+Setup WIFI
+
+Choose next to update software
+
+
 
 sudo update
 sudo dist-upgrade
