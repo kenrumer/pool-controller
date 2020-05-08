@@ -20,6 +20,9 @@ https://sourceforge.net/projects/win32diskimager/
 
 Insert sdcard into raspberry pi and start it up
 
+Reset the password for 'pi' account:
+sudo passwd pi
+
 sudo update
 sudo dist-upgrade
 sudo apt-get install git
