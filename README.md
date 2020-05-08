@@ -18,6 +18,8 @@ https://downloads.raspberrypi.org/raspbian_full_latest
 Download Win32DiskImager:
 https://sourceforge.net/projects/win32diskimager/
 
+Insert sdcard into raspberry pi and start it up
+
 sudo update
 sudo dist-upgrade
 sudo apt-get install git
