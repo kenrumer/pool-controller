@@ -5,5 +5,11 @@ pi dir controls the rpi stuff
 arduino dir controls the arduino stuff
 www controls the UI stuff
 
-Must install
+Download Rapbian with desktop and recommended software: raspberrypi.org/downloads/raspbian/
+Download Win32DiskImager
+
+sudo update
+sudo dist-upgrade
+sudo apt-get install git
+git clone <repo_name>
 sudo pip install pyserial
