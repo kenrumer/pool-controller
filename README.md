@@ -39,6 +39,12 @@ Setup WIFI
 
 Choose next to update software, then restart.  Had to go back to run again, once. Then reboot and try again...
 
+Launch Raspberry Pi Configuration from the Preferences menu
+Navigate to the Interfaces tab
+Select Enabled next to SSH
+Click OK
+
+
 --------------------------------
 
 Get the IP address, and mac address:
@@ -46,12 +52,6 @@ ifconfig -a
 
 You need this because we won't be using the desktop anymore.  You will need to add this mac address to your router as a static IP.  I cannot provide this documentation
 
-
-
------------------------
-Need python, pyserial, source code
-sudo update
-sudo dist-upgrade
-sudo apt-get install git python3
-sudo pip install pyserial
+--------------------------------
+Need source code
 git clone <repo_name>
