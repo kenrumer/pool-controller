@@ -5,8 +5,11 @@ pi dir controls the rpi stuff
 arduino dir controls the arduino stuff
 www controls the UI stuff
 
-Download Rapbian with desktop and recommended software: raspberrypi.org/downloads/raspbian/
-Download Win32DiskImager
+Download Rapbian with desktop and recommended software:
+raspberrypi.org/downloads/raspbian/
+
+Download Win32DiskImager:
+https://sourceforge.net/projects/win32diskimager/
 
 sudo update
 sudo dist-upgrade
